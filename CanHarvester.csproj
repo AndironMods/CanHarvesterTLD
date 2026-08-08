@@ -52,6 +52,11 @@
       <Private>false</Private>
     </Reference>
 
+    <Reference Include="Unity.Addressables">
+      <HintPath>$(MelonLoaderLibsPath)\Unity.Addressables.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>MelonLoader_Libs\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
