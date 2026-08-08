@@ -1,14 +1,14 @@
 # CanHarvesterTLD
 
-A simple mod for **The Long Dark** that makes Recycled Cans harvestable for Scrap Metal.
+A simple mod for **The Long Dark** (Version: 2.55) that makes Recycled Cans harvestable for Scrap Metal.
 
 ## Installation
 
 1. **Requirements:**
-   - MelonLoader installed for The Long Dark
+   - [MelonLoader](https://github.com/LavaGang/MelonLoader/releases) installed for The Long Dark
 
 2. **Install:**
-   - Download `CanHarvesterTLD` Mod
+   - Download `CanHarvesterTLD.zip` Mod
    - Place `CanHarvester.dll` in: `...\steamapps\common\TheLongDark\Mods` Folder
    - Launch the game
 
