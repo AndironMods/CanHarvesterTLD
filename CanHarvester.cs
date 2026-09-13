@@ -41,7 +41,7 @@ namespace CanHarvester
 
 		public override void OnInitializeMelon()
 		{
-			MelonLogger.Msg("[CanHarvester] ===== MOD INITIALIZED =====");
+			MelonLogger.Msg("[CanHarvester] *** CanHarvester Mod initialized ***");
 			MelonLogger.Msg($"[CanHarvester] Harvest config: Duration={HarvestDurationMinutes}min, Audio={HarvestAudio}, YieldCount={YieldCount}");
 		}
 
