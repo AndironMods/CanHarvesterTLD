@@ -5,7 +5,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>CanHarvester</AssemblyName>
     <RootNamespace>CanHarvester</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Andiron</Authors>
     <Description>Harvest Cans faster than you can</Description>
     <LangVersion>latest</LangVersion>

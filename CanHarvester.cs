@@ -5,7 +5,7 @@ using Il2Cpp;
 using UnityEngine;
 using System.Reflection;
 
-[assembly: MelonInfo(typeof(CanHarvester.CanHarvesterMod), "Can Harvester", "1.0.0", "Andiron")]
+[assembly: MelonInfo(typeof(CanHarvester.CanHarvesterMod), "Can Harvester", "1.0.1", "Andiron")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 
 namespace CanHarvester
