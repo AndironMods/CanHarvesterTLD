@@ -20,7 +20,10 @@ namespace CanHarvester
 		private GearItem _cookingPotTemplate = null;
 		private object _cachedHarvest = null;
 		private bool _harvestInitialized = false;
-		private string _lastScene = "";
+		private int _lastSceneHandle = int.MinValue;
+		private float _panelLookupTimer = 0f;
+		private const float PANEL_LOOKUP_INTERVAL = 1f;
+		private bool _wasPanelOpen = false;
 		private float _hookCheckTimer = 0f;
 		private const float HOOK_CHECK_INTERVAL = 2f; // Check for recycled cans every 2 seconds
 		private HashSet<GearItem> _processedItems = new HashSet<GearItem>(); // Track already injected items
@@ -49,17 +52,25 @@ namespace CanHarvester
 		{
 			try
 			{
-				// Detect scene changes
-				string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-				if (_lastScene != currentScene)
+				// Detect scene changes (compare the cheap int handle, not the name string)
+				int currentSceneHandle = UnityEngine.SceneManagement.SceneManager.GetActiveScene().handle;
+				if (_lastSceneHandle != currentSceneHandle)
 				{
-					_lastScene = currentScene;
+					_lastSceneHandle = currentSceneHandle;
 					CleanupScene();
 				}
 
-				// Only initialize when Panel_Inventory is found (means we're in-game)
+				float dt = Time.unscaledDeltaTime;
+
+				// FindObjectOfType is a scene-wide search and only finds ACTIVE objects. The inventory
+				// panel is inactive while the backpack is closed, so never run this search every frame.
 				if (_panelInventory == null)
 				{
+					_panelLookupTimer += dt;
+					if (_panelLookupTimer < PANEL_LOOKUP_INTERVAL)
+						return;
+					_panelLookupTimer = 0f;
+
 					_panelInventory = UnityEngine.Object.FindObjectOfType<Panel_Inventory>();
 					if (_panelInventory != null && !_harvestInitialized)
 					{
@@ -68,18 +79,27 @@ namespace CanHarvester
 					return;
 				}
 
+				// Injection is only needed while the inventory is open; skip all work otherwise
+				bool panelOpen = _panelInventory.gameObject != null && _panelInventory.gameObject.activeInHierarchy;
+				if (!panelOpen)
+				{
+					_wasPanelOpen = false;
+					return;
+				}
+
 				CheckSelectedItem();
 
-				// Periodically check for recycled cans (not every frame)
-				_hookCheckTimer += Time.deltaTime;
-				if (_hookCheckTimer >= HOOK_CHECK_INTERVAL)
+				// Scan immediately when the panel opens, then periodically while it stays open
+				_hookCheckTimer += dt;
+				if (!_wasPanelOpen || _hookCheckTimer >= HOOK_CHECK_INTERVAL)
 				{
+					_wasPanelOpen = true;
 					_hookCheckTimer = 0f;
 					HookPanelEnable();
 				}
 
 				// Periodically clean up dead references to prevent memory leak
-				_cleanupTimer += Time.deltaTime;
+				_cleanupTimer += dt;
 				if (_cleanupTimer >= CLEANUP_INTERVAL)
 				{
 					_cleanupTimer = 0f;
@@ -190,6 +210,8 @@ namespace CanHarvester
 				_cachedHarvest = null;
 				_lastSelectedItem = null;
 				_processedItems.Clear();
+				_panelLookupTimer = 0f;
+				_wasPanelOpen = false;
 				_hookCheckTimer = 0f;
 				_cleanupTimer = 0f;
 			}
