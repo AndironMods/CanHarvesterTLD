@@ -5,7 +5,7 @@ using Il2Cpp;
 using UnityEngine;
 using System.Reflection;
 
-[assembly: MelonInfo(typeof(CanHarvester.CanHarvesterMod), "Can Harvester", "1.0.1", "Andiron")]
+[assembly: MelonInfo(typeof(CanHarvester.CanHarvesterMod), "Can Harvester", "1.0.2", "Andiron")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
 
 namespace CanHarvester
@@ -24,8 +24,6 @@ namespace CanHarvester
 		private float _panelLookupTimer = 0f;
 		private const float PANEL_LOOKUP_INTERVAL = 1f;
 		private bool _wasPanelOpen = false;
-		private float _hookCheckTimer = 0f;
-		private const float HOOK_CHECK_INTERVAL = 2f; // Check for recycled cans every 2 seconds
 		private HashSet<GearItem> _processedItems = new HashSet<GearItem>(); // Track already injected items
 		private float _cleanupTimer = 0f;
 		private const float CLEANUP_INTERVAL = 10f; // Clean up dead references every 10 seconds
@@ -62,8 +60,8 @@ namespace CanHarvester
 
 				float dt = Time.unscaledDeltaTime;
 
-				// FindObjectOfType is a scene-wide search and only finds ACTIVE objects. The inventory
-				// panel is inactive while the backpack is closed, so never run this search every frame.
+				// Scene-wide Find* calls only see active objects and are expensive; the panel is inactive while
+				// the backpack is closed, so fetch it from the InterfaceManager instead (cheap, retried once per second).
 				if (_panelInventory == null)
 				{
 					_panelLookupTimer += dt;
@@ -71,7 +69,7 @@ namespace CanHarvester
 						return;
 					_panelLookupTimer = 0f;
 
-					_panelInventory = UnityEngine.Object.FindObjectOfType<Panel_Inventory>();
+					_panelInventory = InterfaceManager.GetPanel<Panel_Inventory>();
 					if (_panelInventory != null && !_harvestInitialized)
 					{
 						InitializeHarvest();
@@ -89,15 +87,12 @@ namespace CanHarvester
 
 				CheckSelectedItem();
 
-				// Scan immediately when the panel opens, then periodically while it stays open
-				_hookCheckTimer += dt;
-				if (!_wasPanelOpen || _hookCheckTimer >= HOOK_CHECK_INTERVAL)
+				// One scan when the panel opens; the selected item is handled every frame by CheckSelectedItem
+				if (!_wasPanelOpen)
 				{
 					_wasPanelOpen = true;
-					_hookCheckTimer = 0f;
 					HookPanelEnable();
 				}
-
 				// Periodically clean up dead references to prevent memory leak
 				_cleanupTimer += dt;
 				if (_cleanupTimer >= CLEANUP_INTERVAL)
@@ -212,7 +207,6 @@ namespace CanHarvester
 				_processedItems.Clear();
 				_panelLookupTimer = 0f;
 				_wasPanelOpen = false;
-				_hookCheckTimer = 0f;
 				_cleanupTimer = 0f;
 			}
 			catch (Exception ex)
